@@ -37,6 +37,23 @@ header h1 {
     margin-bottom: 10px;
 }
 
+.author-info {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.author-info a {
+    color: #4a6fa5;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.author-info a:hover {
+    color: #2c3e50;
+    text-decoration: underline;
+}
+
 .main-content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
