@@ -1,82 +1,57 @@
 # Expense Splitter
 
-Made with ❤️ by [Sagar Gondaliya](https://github.com/Sagar610) | [LinkedIn](https://www.linkedin.com/in/sagar-gondaliya/)
-
-A simple and efficient web application for splitting expenses among friends, roommates, or colleagues. Built with HTML, CSS, and JavaScript.
-
-![Expense Splitter Screenshot](https://sagar610.github.io/expense-splitter/screenshot.png)
+A simple web application to split expenses among friends and groups. Built with HTML, CSS, and JavaScript, using Firebase for real-time data storage.
 
 ## Features
 
-- 📝 Quick expense entry with automatic splitting
-- 👥 Add multiple people at once using comma separation
-- 💰 Set up default splitting groups
-- 📊 View total expense summary
-- 📱 Mobile-friendly design
-- 📤 Export expenses to WhatsApp
-- 🔄 Easy expense management with undo functionality
+- Create expense groups
+- Add multiple people at once
+- Set default split groups
+- Quick expense entry
+- Expense history tracking
+- Settlement calculations
+- Share groups via links
+- Export expenses to WhatsApp
 
-## Live Demo
-
-Visit the live application at: [https://sagar610.github.io/expense-splitter/](https://sagar610.github.io/expense-splitter/)
-
-## How to Use
-
-1. **Add People**
-   - Enter names separated by commas
-   - Click "Add People" to add them to the group
-
-2. **Set Default Group**
-   - Select people who will share expenses by default
-   - Use "Select All" for quick selection
-   - Click "Save Default Group" to confirm
-
-3. **Add Expenses**
-   - Enter expense name and amount
-   - Select who paid for it
-   - The expense will be automatically split among the default group
-
-4. **View History**
-   - See all expenses in a clean, receipt-like format
-   - View who paid and how much
-   - Use the × button to remove expenses if needed
-
-5. **Export**
-   - Click the "Export" button to share expenses via WhatsApp
-
-## Local Setup
+## Setup
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/Sagar610/expense-splitter.git
-   ```
+```bash
+git clone https://github.com/Sagar610/expense-splitter.git
+cd expense-splitter
+```
 
-2. Open the project folder:
-   ```bash
-   cd expense-splitter
-   ```
+2. Set up Firebase:
+   - Create a Firebase project at [https://console.firebase.google.com/](https://console.firebase.google.com/)
+   - Enable Realtime Database
+   - Update the Firebase configuration in `script.js` with your project details
 
-3. Open `index.html` in your web browser
+3. Open `index.html` in your browser or serve it using a local server.
+
+## Usage
+
+1. Create a new group
+2. Add people to the group
+3. Set up a default split group
+4. Start adding expenses
+5. Share the group link with others
+6. View expense history and settlements
 
 ## Technologies Used
 
 - HTML5
 - CSS3
 - JavaScript (ES6)
-- GitHub Pages (Hosting)
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+- Firebase Realtime Database
+- Firebase Analytics
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+MIT License
 
 ## Author
 
-- Sagar Gondaliya
-- GitHub: [@Sagar610](https://github.com/Sagar610)
+Made with ❤️ by [Sagar Gondaliya](https://github.com/Sagar610)
 
 ## Support
 

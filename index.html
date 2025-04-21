@@ -6,42 +6,18 @@
     <title>Expense Splitter</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Firebase SDK -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAOB-xrC-BNm0BRqrdSbiRiJ6fScAsh4S4",
-            authDomain: "splitwise-eb56b.firebaseapp.com",
-            projectId: "splitwise-eb56b",
-            storageBucket: "splitwise-ebbasestorage.app",
-            messagingSenderId: "357345598220",
-            appId: "1:357345598220:web:0547753ff0929ff2f20729",
-            measurementId: "G-700HZHRKMJ",
-            databaseURL: "https://splitwise-eb56b-default-rtdb.firebaseio.com"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const database = getDatabase(app);
-
-        // Make Firebase functions available globally
-        window.database = database;
-        window.ref = ref;
-        window.set = set;
-        window.onValue = onValue;
-    </script>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Expense Splitter</h1>
             <p class="author-info">Made with ❤️ by <a href="https://github.com/Sagar610" target="_blank">Sagar Gondaliya</a> | <a href="https://www.linkedin.com/in/sagar-gondaliya/" target="_blank">LinkedIn</a></p>
+            <div class="group-info">
+                <h2 id="group-name-display">Loading group...</h2>
+                <button id="copy-group-link" class="btn btn-secondary">
+                    <i class="fas fa-link"></i> Copy Group Link
+                </button>
+            </div>
             <p>Split your expenses fairly among friends</p>
         </header>
 
@@ -121,7 +97,6 @@
             </div>
         </div>
     </div>
-    <script src="firebase-config.js"></script>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html> 

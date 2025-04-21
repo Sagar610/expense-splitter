@@ -1,3 +1,37 @@
+// Import Firebase functions
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+// Initialize Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyAOB-xrC-BNm0BRqrdSbiRiJ6fScAsh4S4",
+    authDomain: "splitwise-eb56b.firebaseapp.com",
+    databaseURL: "https://splitwise-eb56b-default-rtdb.firebaseio.com",
+    projectId: "splitwise-eb56b",
+    storageBucket: "splitwise-eb56b.firebasestorage.app",
+    messagingSenderId: "357345598220",
+    appId: "1:357345598220:web:0547753ff0929ff2f20729",
+    measurementId: "G-700HZHRKMJ"
+};
+
+let app;
+let database;
+let analytics;
+let currentGroupId = null;
+let currentGroupName = null;
+
+// Initialize Firebase
+try {
+    app = initializeApp(firebaseConfig);
+    database = getDatabase(app);
+    analytics = getAnalytics(app);
+    console.log("Firebase initialized successfully");
+} catch (error) {
+    console.error("Error initializing Firebase:", error);
+    alert("Error connecting to the database. Please check your Firebase configuration.");
+}
+
 // Store people and expenses
 let people = [];
 let expenses = [];
@@ -5,76 +39,57 @@ let defaultGroup = [];
 
 // Load data from Firebase
 function loadFromFirebase() {
-    console.log('Loading data from Firebase...');
-    
-    try {
-        // Load people
-        const peopleRef = ref(database, 'people');
-        onValue(peopleRef, (snapshot) => {
-            const data = snapshot.val();
-            console.log('People data:', data);
-            people = data || [];
-            updatePeopleSelects();
-        }, (error) => {
-            console.error('Error loading people:', error);
-        });
+    // Get group ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    currentGroupId = urlParams.get('group');
 
-        // Load expenses
-        const expensesRef = ref(database, 'expenses');
-        onValue(expensesRef, (snapshot) => {
-            const data = snapshot.val();
-            console.log('Expenses data:', data);
-            expenses = data || [];
+    if (!currentGroupId) {
+        window.location.href = 'main.html';
+        return;
+    }
+
+    // Load group data
+    const groupRef = ref(database, `groups/${currentGroupId}`);
+    onValue(groupRef, (snapshot) => {
+        const group = snapshot.val();
+        if (group) {
+            currentGroupName = group.name;
+            people = group.people || [];
+            expenses = group.expenses || [];
+            defaultGroup = group.defaultGroup || [];
+            
+            // Update group name display
+            const groupNameDisplay = document.getElementById('group-name-display');
+            if (groupNameDisplay) {
+                groupNameDisplay.textContent = currentGroupName;
+            }
+            
+            updatePeopleSelects();
             updateExpenseList();
             calculateSettlements();
             updateExpenseSummary();
-        }, (error) => {
-            console.error('Error loading expenses:', error);
-        });
-
-        // Load default group
-        const defaultGroupRef = ref(database, 'defaultGroup');
-        onValue(defaultGroupRef, (snapshot) => {
-            const data = snapshot.val();
-            console.log('Default group data:', data);
-            defaultGroup = data || [];
-            // Update checkbox states
-            if (defaultGroup.length > 0) {
-                defaultGroup.forEach(person => {
-                    const checkbox = document.getElementById(`default-${person}`);
-                    if (checkbox) {
-                        checkbox.checked = true;
-                    }
-                });
-            }
-            updateExpenseSummary(); // Update summary when default group changes
-        }, (error) => {
-            console.error('Error loading default group:', error);
-        });
-    } catch (error) {
-        console.error('Error in loadFromFirebase:', error);
-    }
+        }
+    }, (error) => {
+        console.error("Error loading group data:", error);
+        alert("Error loading group data. Please check your Firebase configuration.");
+    });
 }
 
 // Save data to Firebase
 function saveToFirebase() {
-    console.log('Saving data to Firebase...');
-    
-    try {
-        set(ref(database, 'people'), people)
-            .then(() => console.log('People saved successfully'))
-            .catch(error => console.error('Error saving people:', error));
-            
-        set(ref(database, 'expenses'), expenses)
-            .then(() => console.log('Expenses saved successfully'))
-            .catch(error => console.error('Error saving expenses:', error));
-            
-        set(ref(database, 'defaultGroup'), defaultGroup)
-            .then(() => console.log('Default group saved successfully'))
-            .catch(error => console.error('Error saving default group:', error));
-    } catch (error) {
-        console.error('Error in saveToFirebase:', error);
-    }
+    if (!currentGroupId) return;
+
+    const groupRef = ref(database, `groups/${currentGroupId}`);
+    set(groupRef, {
+        id: currentGroupId,
+        name: currentGroupName,
+        people: people,
+        expenses: expenses,
+        defaultGroup: defaultGroup
+    }).catch(error => {
+        console.error('Error saving to Firebase:', error);
+        alert('Error saving data. Please try again.');
+    });
 }
 
 // DOM Elements
@@ -125,17 +140,27 @@ selectAllBtn.addEventListener('click', (e) => {
     
     // Update the button text
     selectAllBtn.textContent = allChecked ? 'Select All' : 'Deselect All';
+    
+    // Update defaultGroup array
+    defaultGroup = Array.from(document.querySelectorAll('#default-group input:checked'))
+        .map(checkbox => checkbox.value);
+    
+    // Save changes
+    saveToFirebase();
 });
 
 // Save default group
 saveDefaultGroupBtn.addEventListener('click', () => {
-    defaultGroup = Array.from(document.querySelectorAll('#default-group input:checked'))
-        .map(checkbox => checkbox.value);
-    console.log('Saving default group:', defaultGroup);
+    const selectedCheckboxes = document.querySelectorAll('#default-group input:checked');
+    defaultGroup = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+    
     if (defaultGroup.length > 0) {
-        alert('Default group saved successfully!');
+        console.log('Saving default group:', defaultGroup);
         saveToFirebase();
-        updateExpenseSummary(); // Update summary when default group changes
+        alert('Default group saved successfully!');
+        updateExpenseSummary();
+    } else {
+        alert('Please select at least one person for the default group.');
     }
 });
 
@@ -181,15 +206,16 @@ function updatePeopleSelects() {
     people.forEach(person => {
         const defaultCheckboxDiv = document.createElement('div');
         defaultCheckboxDiv.className = 'checkbox-item';
+        const isChecked = defaultGroup.includes(person);
         defaultCheckboxDiv.innerHTML = `
-            <input type="checkbox" id="default-${person}" value="${person}">
+            <input type="checkbox" id="default-${person}" value="${person}" ${isChecked ? 'checked' : ''}>
             <label for="default-${person}">${person}</label>
         `;
         defaultGroupDiv.appendChild(defaultCheckboxDiv);
     });
     
     // Reset select all button text
-    selectAllBtn.textContent = 'Select All';
+    selectAllBtn.textContent = defaultGroup.length === people.length ? 'Deselect All' : 'Select All';
 }
 
 // Update expense summary
@@ -398,4 +424,22 @@ function exportToWhatsApp() {
     // Open WhatsApp with the message
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
-} 
+}
+
+// Copy group link to clipboard
+document.getElementById('copy-group-link').addEventListener('click', () => {
+    const shareLink = `${window.location.origin}/index.html?group=${currentGroupId}`;
+    navigator.clipboard.writeText(shareLink)
+        .then(() => {
+            const button = document.getElementById('copy-group-link');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> Link Copied!';
+            setTimeout(() => {
+                button.innerHTML = originalText;
+            }, 2000);
+        })
+        .catch(err => {
+            console.error('Error copying link:', err);
+            alert('Failed to copy link. Please try again.');
+        });
+}); 
