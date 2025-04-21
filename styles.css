@@ -272,9 +272,9 @@ input[type="text"]::placeholder {
     position: absolute;
     right: 20px;
     top: 20px;
-    background: #f0f0f0;
-    color: #666;
-    border: 1px solid #ddd;
+    background: #25D366;
+    color: white;
+    border: none;
     border-radius: 3px;
     padding: 2px 6px;
     font-size: 0.7em;
@@ -287,8 +287,8 @@ input[type="text"]::placeholder {
 }
 
 .btn-export:hover {
-    background: #e0e0e0;
-    color: #333;
+    background: #128C7E;
+    color: white;
 }
 
 .expense-summary {
