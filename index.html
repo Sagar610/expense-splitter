@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Splitter</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOB-xrC-BNm0BRqrdSbiRiJ6fScAsh4S4",
+            authDomain: "splitwise-eb56b.firebaseapp.com",
+            projectId: "splitwise-eb56b",
+            storageBucket: "splitwise-ebbasestorage.app",
+            messagingSenderId: "357345598220",
+            appId: "1:357345598220:web:0547753ff0929ff2f20729",
+            measurementId: "G-700HZHRKMJ",
+            databaseURL: "https://splitwise-eb56b-default-rtdb.firebaseio.com"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+
+        // Make Firebase functions available globally
+        window.database = database;
+        window.ref = ref;
+        window.set = set;
+        window.onValue = onValue;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Expense Splitter</h1>
+            <p>Split your expenses fairly among friends</p>
+        </header>
+
+        <div class="main-content">
+            <div class="add-people-section">
+                <h2>Add People</h2>
+                <form id="add-multiple-people-form">
+                    <div class="form-group">
+                        <label for="multiple-people">Enter names separated by commas</label>
+                        <input type="text" id="multiple-people" placeholder="e.g., John, Jane, Bob" required>
+                    </div>
+                    <button type="submit" class="btn">Add People</button>
+                </form>
+            </div>
+
+            <div class="default-group-section">
+                <h2>Default Split Group</h2>
+                <div class="form-group">
+                    <label>Select people for default split group</label>
+                    <button id="select-all" class="btn btn-secondary">Select All</button>
+                    <div id="default-group" class="checkbox-group">
+                        <!-- Checkboxes will be added dynamically -->
+                    </div>
+                </div>
+                <button id="save-default-group" class="btn">Save Default Group</button>
+            </div>
+
+            <div class="quick-expense-section">
+                <h2>Add Expense</h2>
+                <form id="quick-expense-form">
+                    <div class="form-group">
+                        <label for="quick-expense-name">Expense Name</label>
+                        <input type="text" id="quick-expense-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quick-expense-amount">Amount</label>
+                        <input type="number" id="quick-expense-amount" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quick-paid-by">Paid By</label>
+                        <select id="quick-paid-by" required>
+                            <option value="">Select Person</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Add Expense</button>
+                </form>
+            </div>
+
+            <div class="expense-summary">
+                <h2>Expense Summary</h2>
+                <div class="summary-content">
+                    <div class="summary-item">
+                        <span class="summary-label">Total Expenses:</span>
+                        <span id="total-expenses" class="summary-value">£0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Average per Person:</span>
+                        <span id="average-per-person" class="summary-value">£0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="expense-history">
+                <h2>Expense History</h2>
+                <button id="export-expenses" class="btn btn-export">
+                </button>
+                <div id="expense-list">
+                    <!-- Expense items will be added here -->
+                </div>
+            </div>
+
+            <div class="settlements">
+                <h2>Settlements</h2>
+                <div id="settlement-list">
+                    <!-- Settlement details will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
