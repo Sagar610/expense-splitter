@@ -1,5 +1,7 @@
 # Expense Splitter
 
+Made with ❤️ by [Sagar Gondaliya](https://github.com/Sagar610) | [LinkedIn](https://www.linkedin.com/in/sagar-gondaliya/)
+
 A simple and efficient web application for splitting expenses among friends, roommates, or colleagues. Built with HTML, CSS, and JavaScript.
 
 ![Expense Splitter Screenshot](https://sagar610.github.io/expense-splitter/screenshot.png)
