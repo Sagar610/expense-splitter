@@ -59,6 +59,21 @@ header h1 {
     gap: 20px;
 }
 
+/* Add margin-top to specific sections */
+.add-people-section,
+.expense-history {
+    margin-top: 30px;
+}
+
+/* Adjust other sections */
+.default-group-section,
+.quick-expense-section,
+.expense-summary,
+.settlements {
+    margin-top: 0;
+}
+
+/* Make sure all sections have consistent base styling */
 .add-people-section,
 .default-group-section,
 .quick-expense-section,
@@ -378,6 +393,11 @@ input[type="text"]::placeholder {
     
     .container {
         padding: 10px;
+    }
+    
+    .add-people-section,
+    .expense-history {
+        margin-top: 20px;
     }
     
     .default-group-section,

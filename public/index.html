@@ -2,15 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Splitter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Split bills and expenses with friends easily. Free bill splitting app for Android.">
+    <meta name="keywords" content="bill splitter, expense splitter, split bills, android app, free app">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Bill Split - Easy Expense Sharing App</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Expense Splitter</h1>
+            <h1>Bill Split</h1>
             <p class="author-info">Made with ❤️ by <a href="https://github.com/Sagar610" target="_blank">Sagar Gondaliya</a> | <a href="https://www.linkedin.com/in/sagar-gondaliya/" target="_blank">LinkedIn</a></p>
             <div class="group-info">
                 <h2 id="group-name-display">Loading group...</h2>
@@ -96,6 +103,19 @@
             </div>
         </div>
     </div>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
     <script type="module" src="script.js"></script>
 </body>
 </html> 
