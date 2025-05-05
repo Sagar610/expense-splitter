@@ -1,445 +1,586 @@
-// Import Firebase functions
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+// Import Firebase modules
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+import { getDatabase, ref, onValue, set, push, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+import { get as getDatabaseValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
-// Initialize Firebase
+// Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyAOB-xrC-BNm0BRqrdSbiRiJ6fScAsh4S4",
+    apiKey: "AIzaSyBxMOMGGe0GvxeIHqFvZqDgWGHwm5lzVIg",
     authDomain: "splitwise-eb56b.firebaseapp.com",
     databaseURL: "https://splitwise-eb56b-default-rtdb.firebaseio.com",
     projectId: "splitwise-eb56b",
-    storageBucket: "splitwise-eb56b.firebasestorage.app",
-    messagingSenderId: "357345598220",
-    appId: "1:357345598220:web:0547753ff0929ff2f20729",
-    measurementId: "G-700HZHRKMJ"
+    storageBucket: "splitwise-eb56b.appspot.com",
+    messagingSenderId: "1098977653274",
+    appId: "1:1098977653274:web:e7a0d2c6a6d4d7d7f1c4c5"
 };
 
-let app;
-let database;
-let analytics;
-let currentGroupId = null;
-let currentGroupName = null;
-
 // Initialize Firebase
-try {
-    app = initializeApp(firebaseConfig);
-    database = getDatabase(app);
-    analytics = getAnalytics(app);
-    console.log("Firebase initialized successfully");
-} catch (error) {
-    console.error("Error initializing Firebase:", error);
-    alert("Error connecting to the database. Please check your Firebase configuration.");
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Get group ID from URL
+const urlParams = new URLSearchParams(window.location.search);
+const groupId = urlParams.get('group');
+
+if (!groupId) {
+    window.location.href = '/landing.html';
 }
 
-// Store people and expenses
-let people = [];
-let expenses = [];
-let defaultGroup = [];
+// Reference to the current group
+const groupRef = ref(db, `groups/${groupId}`);
 
-// Load data from Firebase
-function loadFromFirebase() {
-    // Get group ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    currentGroupId = urlParams.get('group');
+// Listen for group data changes
+onValue(groupRef, (snapshot) => {
+    const groupData = snapshot.val();
+    if (!groupData) {
+        console.error('Group not found');
+        window.location.href = '/landing.html';
+        return;
+    }
+            
+    // Update group name display
+    document.getElementById('group-name-display').textContent = groupData.name || 'Unnamed Group';
+    
+    // Update people list
+    updatePeopleList(groupData.people || []);
+    
+    // Update expense list
+    updateExpenseList(groupData.expenses || []);
+    
+    // Update expense summary
+    updateExpenseSummary(groupData.expenses || [], groupData.people || []);
+    
+    // Update settlements
+    calculateAndDisplaySettlements(groupData.expenses || [], groupData.people || []);
 
-    if (!currentGroupId) {
-        window.location.href = 'main.html';
+    // Generate QR code
+    generateQRCode();
+}, (error) => {
+    console.error('Error loading group data:', error);
+    alert('Error loading group data. Please try again.');
+});
+
+// Handle adding multiple people
+document.getElementById('add-multiple-people-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('multiple-people');
+    const names = input.value.split(',').map(name => name.trim()).filter(name => name);
+    
+    if (names.length === 0) {
+        showToast('Please enter at least one name', 'error');
         return;
     }
 
-    // Load group data
-    const groupRef = ref(database, `groups/${currentGroupId}`);
-    onValue(groupRef, (snapshot) => {
-        const group = snapshot.val();
-        if (group) {
-            currentGroupName = group.name;
-            people = group.people || [];
-            expenses = group.expenses || [];
-            defaultGroup = group.defaultGroup || [];
-            
-            // Update group name display
-            const groupNameDisplay = document.getElementById('group-name-display');
-            if (groupNameDisplay) {
-                groupNameDisplay.textContent = currentGroupName;
-            }
-            
-            updatePeopleSelects();
-            updateExpenseList();
-            calculateSettlements();
-            updateExpenseSummary();
+    try {
+        const snapshot = await getDatabaseValue(groupRef);
+        if (!snapshot.exists()) {
+            throw new Error('Group not found');
         }
-    }, (error) => {
-        console.error("Error loading group data:", error);
-        alert("Error loading group data. Please check your Firebase configuration.");
-    });
-}
 
-// Save data to Firebase
-function saveToFirebase() {
-    if (!currentGroupId) return;
-
-    const groupRef = ref(database, `groups/${currentGroupId}`);
-    set(groupRef, {
-        id: currentGroupId,
-        name: currentGroupName,
-        people: people,
-        expenses: expenses,
-        defaultGroup: defaultGroup
-    }).catch(error => {
-        console.error('Error saving to Firebase:', error);
-        alert('Error saving data. Please try again.');
-    });
-}
-
-// DOM Elements
-const addMultiplePeopleForm = document.getElementById('add-multiple-people-form');
-const quickExpenseForm = document.getElementById('quick-expense-form');
-const quickPaidBySelect = document.getElementById('quick-paid-by');
-const defaultGroupDiv = document.getElementById('default-group');
-const saveDefaultGroupBtn = document.getElementById('save-default-group');
-const selectAllBtn = document.getElementById('select-all');
-const expenseList = document.getElementById('expense-list');
-const settlementList = document.getElementById('settlement-list');
-const totalExpensesElement = document.getElementById('total-expenses');
-const averagePerPersonElement = document.getElementById('average-per-person');
-const exportExpensesBtn = document.getElementById('export-expenses');
-
-// Load data when page loads
-document.addEventListener('DOMContentLoaded', loadFromFirebase);
-
-// Add multiple people form submission
-addMultiplePeopleForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const multiplePeopleInput = document.getElementById('multiple-people').value.trim();
-    
-    if (multiplePeopleInput) {
-        const newPeople = multiplePeopleInput.split(',')
-            .map(name => name.trim())
-            .filter(name => name && !people.includes(name));
+        const groupData = snapshot.val();
+        const currentPeople = groupData.people || [];
         
-        if (newPeople.length > 0) {
-            people.push(...newPeople);
-            updatePeopleSelects();
-            addMultiplePeopleForm.reset();
-            updateExpenseSummary();
-            saveToFirebase();
+        const duplicates = names.filter(name => currentPeople.includes(name));
+        if (duplicates.length > 0) {
+            showToast(`These people already exist: ${duplicates.join(', ')}`, 'error');
+            return;
         }
+        
+        const updatedPeople = [...currentPeople, ...names];
+        const updatedGroupData = {
+            ...groupData,
+            people: updatedPeople
+        };
+        
+        await set(groupRef, updatedGroupData);
+        input.value = '';
+        showToast('People added successfully');
+    } catch (error) {
+        console.error('Error adding people:', error);
+        showToast('Error adding people', 'error');
     }
 });
 
-// Select all button click handler
-selectAllBtn.addEventListener('click', (e) => {
-    e.preventDefault();
+// Handle Select All button
+document.getElementById('select-all').addEventListener('click', (e) => {
+    e.preventDefault(); // Prevent any form submission
+    e.stopPropagation(); // Stop event bubbling
+    
     const checkboxes = document.querySelectorAll('#default-group input[type="checkbox"]');
-    const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+    const selectAllBtn = document.getElementById('select-all');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
     
     checkboxes.forEach(checkbox => {
         checkbox.checked = !allChecked;
     });
     
-    // Update the button text
-    selectAllBtn.textContent = allChecked ? 'Select All' : 'Deselect All';
-    
-    // Update defaultGroup array
-    defaultGroup = Array.from(document.querySelectorAll('#default-group input:checked'))
-        .map(checkbox => checkbox.value);
-    
-    // Save changes
-    saveToFirebase();
+    selectAllBtn.innerHTML = allChecked ? 
+        '<i class="fas fa-users"></i> Select All' : 
+        '<i class="fas fa-users-slash"></i> Deselect All';
 });
 
-// Save default group
-saveDefaultGroupBtn.addEventListener('click', () => {
-    const selectedCheckboxes = document.querySelectorAll('#default-group input:checked');
-    defaultGroup = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
-    
-    if (defaultGroup.length > 0) {
-        console.log('Saving default group:', defaultGroup);
-        saveToFirebase();
-        alert('Default group saved successfully!');
-        updateExpenseSummary();
-    } else {
-        alert('Please select at least one person for the default group.');
-    }
-});
-
-// Quick expense form submission
-quickExpenseForm.addEventListener('submit', (e) => {
+// Handle adding new expense
+document.getElementById('quick-expense-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const expenseName = document.getElementById('quick-expense-name').value.trim();
+    const expenseName = document.getElementById('quick-expense-name').value;
     const amount = parseFloat(document.getElementById('quick-expense-amount').value);
     const paidBy = document.getElementById('quick-paid-by').value;
     
-    if (expenseName && amount > 0 && paidBy && defaultGroup.length > 0) {
-        const expense = {
+    if (!expenseName || !amount || !paidBy) {
+        showToast('Please fill in all expense details', 'error');
+        return;
+    }
+
+    const checkboxes = document.querySelectorAll('#default-group input[type="checkbox"]:checked');
+    const splitBetween = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (splitBetween.length === 0) {
+        showToast('Please select at least one person to split with', 'error');
+        return;
+    }
+
+    try {
+        const snapshot = await getDatabaseValue(groupRef);
+        if (!snapshot.exists()) {
+            throw new Error('Group not found');
+        }
+
+        const groupData = snapshot.val();
+        const currentExpenses = groupData.expenses || [];
+        
+        const newExpense = {
             name: expenseName,
             amount: amount,
             paidBy: paidBy,
-            splitBetween: defaultGroup,
+            splitBetween: splitBetween,
             date: new Date().toISOString()
         };
         
-        expenses.push(expense);
-        updateExpenseList();
-        calculateSettlements();
-        updateExpenseSummary();
-        quickExpenseForm.reset();
-        saveToFirebase();
-    } else if (defaultGroup.length === 0) {
-        alert('Please set up a default group first!');
+        const updatedGroupData = {
+            ...groupData,
+            expenses: [...currentExpenses, newExpense]
+        };
+        
+        await set(groupRef, updatedGroupData);
+        e.target.reset();
+        showToast('Expense added successfully');
+    } catch (error) {
+        console.error('Error adding expense:', error);
+        showToast('Error adding expense', 'error');
     }
 });
 
-// Update people selects and checkboxes
-function updatePeopleSelects() {
-    // Update paid by select
-    const selectOptions = '<option value="">Select Person</option>' + 
-        people.map(person => `<option value="${person}">${person}</option>`).join('');
+// Handle copying group link
+document.getElementById('copy-group-link').addEventListener('click', () => {
+    const groupLink = `${window.location.origin}/index.html?group=${groupId}`;
+    navigator.clipboard.writeText(groupLink).then(() => {
+        alert('Group link copied to clipboard!');
+    });
+});
+
+// Helper function to update people list
+function updatePeopleList(people) {
+    const paidBySelect = document.getElementById('quick-paid-by');
+    const defaultGroup = document.getElementById('default-group');
     
-    quickPaidBySelect.innerHTML = selectOptions;
+    // Clear existing options/checkboxes
+    paidBySelect.innerHTML = '<option value="">Select person</option>';
+    defaultGroup.innerHTML = '';
     
-    // Update default group checkboxes
-    defaultGroupDiv.innerHTML = '';
-    
+    // Add new options/checkboxes
     people.forEach(person => {
-        const defaultCheckboxDiv = document.createElement('div');
-        defaultCheckboxDiv.className = 'checkbox-item';
-        const isChecked = defaultGroup.includes(person);
-        defaultCheckboxDiv.innerHTML = `
-            <input type="checkbox" id="default-${person}" value="${person}" ${isChecked ? 'checked' : ''}>
-            <label for="default-${person}">${person}</label>
+        // Add to paid by select
+        const option = document.createElement('option');
+        option.value = person;
+        option.textContent = person;
+        paidBySelect.appendChild(option);
+        
+        // Add to split between checkboxes
+        const div = document.createElement('div');
+        div.className = 'checkbox-item';
+        div.innerHTML = `
+            <input type="checkbox" id="split-${person}" value="${person}" checked>
+            <label for="split-${person}">${person}</label>
         `;
-        defaultGroupDiv.appendChild(defaultCheckboxDiv);
+        defaultGroup.appendChild(div);
     });
-    
-    // Reset select all button text
-    selectAllBtn.textContent = defaultGroup.length === people.length ? 'Deselect All' : 'Select All';
-}
 
-// Update expense summary
-function updateExpenseSummary() {
-    console.log('Calculating expense summary...');
-    console.log('Expenses:', expenses);
-    console.log('Default group:', defaultGroup);
-    
-    const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-    console.log('Total expenses:', totalExpenses);
-    
-    // Calculate average based on default group size, not total people
-    const averagePerPerson = defaultGroup.length > 0 ? totalExpenses / defaultGroup.length : 0;
-    console.log('Average per person:', averagePerPerson);
-    console.log('Default group size:', defaultGroup.length);
-    
-    totalExpensesElement.textContent = `£${totalExpenses.toFixed(2)}`;
-    averagePerPersonElement.textContent = `£${averagePerPerson.toFixed(2)}`;
-}
-
-// Update expense list
-function updateExpenseList() {
-    expenseList.innerHTML = '';
-    
-    // Add export button
-    const exportButton = document.createElement('button');
-    exportButton.className = 'btn-export';
-    exportButton.textContent = 'Share';
-    exportButton.title = 'Share expenses';
-    exportButton.onclick = exportToWhatsApp;
-    expenseList.appendChild(exportButton);
-    
-    // Add expenses
-    expenses.forEach((expense, index) => {
-        const expenseItem = document.createElement('div');
-        expenseItem.className = 'expense-item';
-        
-        const expenseContent = document.createElement('div');
-        expenseContent.className = 'expense-content';
-        
-        const expenseDetails = document.createElement('div');
-        expenseDetails.className = 'expense-details';
-        
-        const number = document.createElement('span');
-        number.className = 'expense-number';
-        number.textContent = `${index + 1}.`;
-        
-        const name = document.createElement('span');
-        name.className = 'expense-name';
-        name.textContent = expense.name;
-        
-        const amount = document.createElement('span');
-        amount.className = 'expense-amount';
-        amount.textContent = `£${expense.amount.toFixed(2)}`;
-        
-        const paidBy = document.createElement('div');
-        paidBy.className = 'expense-paid-by';
-        
-        const paidByText = document.createElement('span');
-        paidByText.textContent = `by ${expense.paidBy}`;
-        
-        // Add undo button as X mark
-        const undoButton = document.createElement('button');
-        undoButton.className = 'btn-undo';
-        undoButton.innerHTML = '×';
-        undoButton.title = 'Remove expense';
-        undoButton.onclick = () => undoExpense(index);
-        
-        paidBy.appendChild(paidByText);
-        paidBy.appendChild(undoButton);
-        
-        expenseDetails.appendChild(number);
-        expenseDetails.appendChild(name);
-        expenseContent.appendChild(expenseDetails);
-        expenseContent.appendChild(amount);
-        
-        expenseItem.appendChild(expenseContent);
-        expenseItem.appendChild(paidBy);
-        
-        expenseList.appendChild(expenseItem);
-    });
-}
-
-// Undo expense function
-function undoExpense(index) {
-    if (confirm('Are you sure you want to undo this expense?')) {
-        expenses.splice(index, 1);
-        saveToFirebase();
-        updateExpenseList();
-        calculateSettlements();
-        updateExpenseSummary();
+    // Update Select All button text
+    const selectAllBtn = document.getElementById('select-all');
+    if (selectAllBtn) {
+        selectAllBtn.innerHTML = '<i class="fas fa-users-slash"></i> Deselect All';
     }
 }
 
-// Calculate settlements
-function calculateSettlements() {
+// Helper function to show toast notification
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }, 100);
+}
+
+// Helper function to update expense list
+function updateExpenseList(expenses) {
+    const expenseList = document.getElementById('expense-list');
+    
+    if (!expenses || expenses.length === 0) {
+        expenseList.innerHTML = '<div class="no-expenses">No expenses yet</div>';
+        return;
+    }
+
+    // Sort expenses by date (newest first)
+    const sortedExpenses = [...expenses].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+    );
+    
+    const expenseHTML = `
+        <div class="expense-header">
+            <h3>Expense History</h3>
+            <button class="btn-whatsapp" onclick="exportToWhatsApp()">
+                <i class="fab fa-whatsapp"></i>
+                Share
+            </button>
+        </div>
+        ${sortedExpenses.map((expense, index) => `
+            <div class="expense-item">
+                <div class="expense-main">
+                    <div class="expense-details">
+                        <span class="expense-name">${expense.name}</span>
+                        <span class="expense-amount">£${expense.amount.toFixed(2)}</span>
+                    </div>
+                    <div class="expense-meta">
+                        <span class="expense-paid-by">
+                            <i class="fas fa-user"></i> ${expense.paidBy}
+                        </span>
+                        <button class="btn-delete" onclick="deleteExpense(${index})" aria-label="Delete expense">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="expense-splits">
+                    <i class="fas fa-users"></i> Split with: ${expense.splitBetween.join(', ')}
+                </div>
+                <div class="expense-date">
+                    <i class="far fa-calendar"></i> ${new Date(expense.date).toLocaleDateString()}
+                </div>
+            </div>
+        `).join('')}
+    `;
+    
+    expenseList.innerHTML = expenseHTML;
+}
+
+// Helper function to calculate settlements
+function calculateSettlements(expenses) {
     const balances = {};
-    
-    // Initialize balances for all people
-    people.forEach(person => {
-        balances[person] = 0;
-    });
-    
-    // Calculate net balance for each person
-    expenses.forEach(expense => {
-        const splitAmount = expense.amount / expense.splitBetween.length;
-        
-        // Add to paid person's balance
-        balances[expense.paidBy] += expense.amount;
-        
-        // Subtract from each person who owes
-        expense.splitBetween.forEach(person => {
-            balances[person] -= splitAmount;
-        });
-    });
-    
-    // Calculate who owes whom
     const settlements = [];
-    const debtors = Object.entries(balances)
-        .filter(([_, balance]) => balance < 0)
-        .map(([person, balance]) => ({ person, amount: -balance }));
-    
-    const creditors = Object.entries(balances)
-        .filter(([_, balance]) => balance > 0)
-        .map(([person, balance]) => ({ person, amount: balance }));
-    
-    // Match debtors with creditors
-    debtors.forEach(debtor => {
-        let remainingDebt = debtor.amount;
-        
-        creditors.forEach(creditor => {
-            if (remainingDebt > 0 && creditor.amount > 0) {
-                const amount = Math.min(remainingDebt, creditor.amount);
-                settlements.push({
-                    from: debtor.person,
-                    to: creditor.person,
-                    amount: amount
-                });
-                remainingDebt -= amount;
-                creditor.amount -= amount;
+
+    // Initialize balances for all participants
+    expenses.forEach(expense => {
+        expense.splitBetween.forEach(participant => {
+            if (!balances[participant]) {
+                balances[participant] = 0;
             }
         });
+        // Also initialize balance for the payer if not already done
+        if (!balances[expense.paidBy]) {
+            balances[expense.paidBy] = 0;
+        }
     });
-    
-    // Update settlement list
-    settlementList.innerHTML = '';
-    settlements.forEach(settlement => {
-        const settlementItem = document.createElement('div');
-        settlementItem.className = 'settlement-item';
-        settlementItem.textContent = `${settlement.from} owes ${settlement.to} £${settlement.amount.toFixed(2)}`;
-        settlementList.appendChild(settlementItem);
+
+    // Calculate net balance for each person
+    expenses.forEach(expense => {
+        const amount = parseFloat(expense.amount);
+        const paidBy = expense.paidBy;
+        const splitBetween = expense.splitBetween;
+        
+        // Add the full amount to payer's balance
+        balances[paidBy] += amount;
+        
+        // Calculate share per person (excluding payer if they're not in splitBetween)
+        const sharePerPerson = amount / splitBetween.length;
+        
+        // Subtract share from each participant
+        splitBetween.forEach(participant => {
+            balances[participant] -= sharePerPerson;
+        });
     });
+
+    // Separate people into debtors and creditors
+    const debtors = [];
+    const creditors = [];
+    
+    Object.entries(balances).forEach(([person, balance]) => {
+        if (balance < -0.01) { // Using small epsilon to handle floating point precision
+            debtors.push({ person, amount: Math.abs(balance) });
+        } else if (balance > 0.01) {
+            creditors.push({ person, amount: balance });
+        }
+    });
+
+    // Sort debtors and creditors by amount
+    debtors.sort((a, b) => b.amount - a.amount);
+    creditors.sort((a, b) => b.amount - a.amount);
+
+    // Create settlements
+    while (debtors.length > 0 && creditors.length > 0) {
+        const debtor = debtors[0];
+        const creditor = creditors[0];
+        
+        const amount = Math.min(debtor.amount, creditor.amount);
+        
+        settlements.push({
+            from: debtor.person,
+            to: creditor.person,
+            amount: parseFloat(amount.toFixed(2))
+        });
+        
+        debtor.amount -= amount;
+        creditor.amount -= amount;
+        
+        if (debtor.amount < 0.01) debtors.shift();
+        if (creditor.amount < 0.01) creditors.shift();
+    }
+
+    return settlements;
 }
 
-// Export functions
-function formatExpenseForWhatsApp(expense) {
-    const splitAmount = expense.amount / expense.splitBetween.length;
-    const allPeopleSelected = expense.splitBetween.length === people.length;
-    const splitBetweenText = allPeopleSelected ? 
-        `All (${expense.splitBetween.length})` : 
-        expense.splitBetween.join(', ');
+// Helper function to display settlements
+function calculateAndDisplaySettlements(expenses, people) {
+    const settlements = calculateSettlements(expenses);
+    const settlementList = document.getElementById('settlement-list');
     
-    return `💰 *${expense.name}*
-Amount: £${expense.amount.toFixed(2)}
-Paid by: ${expense.paidBy}
-Split between: ${splitBetweenText}
-Each person owes: £${splitAmount.toFixed(2)}
-Date: ${new Date(expense.date).toLocaleDateString()}
--------------------`;
+    if (!settlements || settlements.length === 0) {
+        settlementList.innerHTML = '<div class="no-settlements">No settlements needed</div>';
+        return;
+    }
+    
+    const settlementHTML = `
+        <h2><i class="fas fa-exchange-alt"></i> Settlements</h2>
+        <div class="settlements-container">
+            ${settlements.map(settlement => `
+                <div class="settlement-item">
+                    <div class="settlement-details">
+                        <span class="settlement-from">
+                            <i class="fas fa-user"></i> ${settlement.from}
+                        </span>
+                        <i class="fas fa-arrow-right"></i>
+                        <span class="settlement-to">
+                            <i class="fas fa-user"></i> ${settlement.to}
+                        </span>
+                    </div>
+                    <span class="settlement-amount">£${settlement.amount.toFixed(2)}</span>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    settlementList.innerHTML = settlementHTML;
 }
 
-function formatSettlementForWhatsApp(settlement) {
-    return `💸 ${settlement.from} owes ${settlement.to} £${settlement.amount.toFixed(2)}`;
-}
+// Function to delete expense
+window.deleteExpense = async function(index) {
+    try {
+        const snapshot = await getDatabaseValue(groupRef);
+        const groupData = snapshot.val() || {};
+        const expenses = groupData.expenses || [];
+        
+        // Get the expense to delete from the sorted list
+        const sortedExpenses = [...expenses].sort((a, b) => 
+            new Date(b.date) - new Date(a.date)
+        );
+        const expenseToDelete = sortedExpenses[index];
+        
+        // Find the actual index in the original array
+        const actualIndex = expenses.findIndex(exp => 
+            exp.name === expenseToDelete.name && 
+            exp.amount === expenseToDelete.amount && 
+            exp.paidBy === expenseToDelete.paidBy &&
+            exp.date === expenseToDelete.date
+        );
+        
+        if (actualIndex === -1) {
+            throw new Error('Expense not found');
+        }
+        
+        // Remove the expense from the original array
+        expenses.splice(actualIndex, 1);
+        
+        // Update the database
+        await set(ref(db, `groups/${groupId}/expenses`), expenses);
+        showToast('Expense deleted successfully');
+    } catch (error) {
+        console.error('Error deleting expense:', error);
+        showToast('Error deleting expense', 'error');
+    }
+};
 
-function exportToWhatsApp() {
-    let message = `*Expense Splitter Summary*\n\n`;
-    
-    // Add expense history
-    message += `*Expense History*\n`;
-    message += expenses.map(formatExpenseForWhatsApp).join('\n');
-    message += `\n*Total Expenses: £${totalExpensesElement.textContent.replace('£', '')}*`;
-    message += `\n*Average per Person: £${averagePerPersonElement.textContent.replace('£', '')}*`;
-    message += `\n-------------------`;
-    
-    // Add settlements
-    message += `\n\n*Settlement Summary*\n`;
-    const settlements = Array.from(settlementList.children).map(item => {
-        const text = item.textContent.trim();
-        return {
-            from: text.split(' owes ')[0],
-            to: text.split(' owes ')[1].split(' £')[0],
-            amount: parseFloat(text.split('£')[1])
+// Function to export to WhatsApp
+window.exportToWhatsApp = function() {
+    const snapshot = getDatabaseValue(groupRef);
+    snapshot.then((data) => {
+        const groupData = data.val();
+        if (!groupData) return;
+
+        const expenses = groupData.expenses || [];
+        const people = groupData.people || [];
+        
+        // Calculate total and per person
+        const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+        const perPerson = total / people.length;
+        
+        // Create message
+        let message = `*Group Expenses Summary*\n\n`;
+        message += `Group Name: ${groupData.name || 'Unnamed Group'}\n\n`;
+        message += `Total: £${total.toFixed(2)}\n`;
+        message += `Average per person: £${perPerson.toFixed(2)}\n\n`;
+        
+        // Add recent expenses
+        message += '*All Expenses:*\n\n';
+        expenses.reverse().forEach((exp, index) => {
+            message += `${index + 1}. ${exp.name}\n`;
+            message += `Amount: £${exp.amount.toFixed(2)}\n`;
+            message += `Paid by: ${exp.paidBy}\n`;
+            message += `Split With: ${exp.splitBetween.join(', ')}\n`;
+            message += '--------------------------------\n';
+        });
+        
+        // Add settlements
+        const settlements = calculateSettlements(expenses);
+        if (settlements.length > 0) {
+            message += '\n*Settlements Required:*\n\n';
+            settlements.forEach(s => {
+                // Calculate the maximum length of names for proper alignment
+                const maxNameLength = Math.max(s.from.length, s.to.length);
+                const fromSpaces = ' '.repeat(maxNameLength - s.from.length);
+                const toSpaces = ' '.repeat(maxNameLength - s.to.length);
+                
+                message += `* ${s.from}${fromSpaces} --> ${s.to}${toSpaces} £${s.amount.toFixed(2)}\n`;
+            });
+        }
+
+        // Add group link
+        const groupLink = `${window.location.origin}/index.html?group=${groupId}`;
+        message += `\nJoin Group:\n${groupLink}`;
+        
+        // Check if device is mobile
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+            // For mobile devices, open WhatsApp app
+            window.open(`whatsapp://send?text=${encodeURIComponent(message)}`, '_blank');
+        } else {
+            // For desktop, open WhatsApp Web
+            window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+        }
+    });
+};
+
+// Function to copy group link
+window.copyGroupLink = function() {
+    const groupLink = `${window.location.origin}/index.html?group=${groupId}`;
+    navigator.clipboard.writeText(groupLink).then(() => {
+        showToast('Group link copied to clipboard!');
+    }).catch(() => {
+        showToast('Failed to copy link. Please try again.', 'error');
+    });
+};
+
+// Helper function to update expense summary
+function updateExpenseSummary(expenses = [], people = []) {
+    if (!expenses || !people) return;
+
+    const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const averagePerPerson = people.length ? totalExpenses / people.length : 0;
+
+    // Calculate individual totals
+    const individualTotals = {};
+    people.forEach(person => {
+        individualTotals[person] = {
+            paid: 0,
+            owes: 0
         };
     });
-    message += settlements.map(formatSettlementForWhatsApp).join('\n');
-    
-    // Create a temporary textarea to copy the text
-    const textarea = document.createElement('textarea');
-    textarea.value = message;
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textarea);
-    
-    // Open WhatsApp with the message
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+
+    expenses.forEach(expense => {
+        const paidBy = expense.paidBy;
+        const amount = expense.amount;
+        const splitBetween = expense.splitBetween;
+        const splitAmount = amount / splitBetween.length;
+
+        // Add to paid amount
+        individualTotals[paidBy].paid += amount;
+
+        // Add to owed amounts
+        splitBetween.forEach(person => {
+            individualTotals[person].owes += splitAmount;
+        });
+    });
+
+    // Update the summary in the UI
+    const summaryHTML = `
+        <div class="total-expenses">
+            <span>Total Expenses</span>
+            <span class="amount">£${totalExpenses.toFixed(2)}</span>
+        </div>
+        <div class="total-expenses">
+            <span>Average per Person</span>
+            <span class="amount">£${averagePerPerson.toFixed(2)}</span>
+        </div>
+        <div class="individual-expenses">
+            <div class="individual-expenses-title">
+                <i class="fas fa-user-circle"></i> Individual Summaries
+            </div>
+            ${Object.entries(individualTotals).map(([person, amounts]) => `
+                <div class="person-expense">
+                    <span>${person}</span>
+                    <div class="person-amounts">
+                        <span class="paid" title="Paid">
+                            <i class="fas fa-arrow-up"></i> £${amounts.paid.toFixed(2)}
+                        </span>
+                        <span class="owes" title="Owes">
+                            <i class="fas fa-arrow-down"></i> £${amounts.owes.toFixed(2)}
+                        </span>
+                        <span class="balance ${amounts.paid - amounts.owes >= 0 ? 'positive' : 'negative'}">
+                            ${amounts.paid - amounts.owes >= 0 ? '+' : ''}£${Math.abs(amounts.paid - amounts.owes).toFixed(2)}
+                        </span>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    document.querySelector('.expense-summary').innerHTML = `
+        <h2><i class="fas fa-chart-pie"></i> Expense Summary</h2>
+        ${summaryHTML}
+    `;
 }
 
-// Copy group link to clipboard
-document.getElementById('copy-group-link').addEventListener('click', () => {
-    const shareLink = `${window.location.origin}/index.html?group=${currentGroupId}`;
-    navigator.clipboard.writeText(shareLink)
-        .then(() => {
-            const button = document.getElementById('copy-group-link');
-            const originalText = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-check"></i> Link Copied!';
-            setTimeout(() => {
-                button.innerHTML = originalText;
-            }, 2000);
-        })
-        .catch(err => {
-            console.error('Error copying link:', err);
-            alert('Failed to copy link. Please try again.');
-        });
-}); 
+// Function to generate QR code
+function generateQRCode() {
+    const qrcodeContainer = document.getElementById('qrcode');
+    // Clear previous QR code if any
+    qrcodeContainer.innerHTML = '';
+    
+    const groupLink = `${window.location.origin}/index.html?group=${groupId}`;
+    
+    // Create QR code
+    new QRCode(qrcodeContainer, {
+        text: groupLink,
+        width: 180,
+        height: 180,
+        colorDark: "#764ba2",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
