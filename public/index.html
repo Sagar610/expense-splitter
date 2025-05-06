@@ -2,120 +2,140 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Split bills and expenses with friends easily. Free bill splitting app for Android.">
-    <meta name="keywords" content="bill splitter, expense splitter, split bills, android app, free app">
-    <meta name="theme-color" content="#4CAF50">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Bill Split - Easy Expense Sharing App</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Split bills and expenses with friends easily. Free expense splitting app.">
+    <title>Bill Split - Easy Expense Sharing</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Bill Split</h1>
-            <p class="author-info">Made with ❤️ by <a href="https://github.com/Sagar610" target="_blank">Sagar Gondaliya</a> | <a href="https://www.linkedin.com/in/sagar-gondaliya/" target="_blank">LinkedIn</a></p>
+            <div class="header-main">
+                <div class="title-container">
+                    <h1><i class="fas fa-receipt"></i>Bill Split</h1>
+                    <span class="author-info">by <a href="https://github.com/Sagar610" target="_blank">Sagar</a></span>
+                </div>
+            </div>
             <div class="group-info">
-                <h2 id="group-name-display">Loading group...</h2>
-                <button id="copy-group-link" class="btn btn-secondary">
-                    <i class="fas fa-link"></i> Copy Group Link
-                </button>
+                <div class="group-name-container">
+                    <h4>Group Name:</h4>
+                    <h2 id="group-name-display">Loading group...</h2>
+                </div>
+                <div class="group-actions">
+                    <button id="copy-group-link" class="btn btn-cute">Share</button>
+                    <button id="export-excel" class="btn btn-cute"><i class="fas fa-file-excel"></i> Export</button>
+                    <button id="new-group-btn" class="btn btn-cute">New Group</button>
+                </div>
             </div>
         </header>
 
         <div class="main-content">
-            <div class="add-people-section">
-                <h2>Add People</h2>
-                <form id="add-multiple-people-form">
-                    <div class="form-group">
-                        <label for="multiple-people">Enter names separated by commas</label>
-                        <input type="text" id="multiple-people" placeholder="e.g. Sagar, Jay, Ronak" required>
-                    </div>
-                    <button type="submit" class="btn">Add People</button>
-                </form>
-            </div>
+            <!-- Left Column -->
+            <div class="left-column">
+                <div class="add-people-section card">
+                    <h2><i class="fas fa-user-plus"></i>Add People</h2>
+                    <form id="add-multiple-people-form">
+                        <div class="form-group">
+                            <label for="multiple-people">Enter names separated by commas</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-user-plus"></i>
+                                <input type="text" id="multiple-people" placeholder="Sagar, Jay, Ronak" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-users"></i> Add People
+                        </button>
+                    </form>
+                </div>
 
-            <div class="default-group-section">
-                <h2>Default Split Group</h2>
-                <div class="form-group">
-                    <label>Select people for default split group</label>
-                    <button id="select-all" class="btn btn-secondary">Select All</button>
-                    <div id="default-group" class="checkbox-group">
-                        <!-- Checkboxes will be added dynamically -->
+                <div class="quick-expense-section card">
+                    <h2><i class="fas fa-plus"></i>Add Expense</h2>
+                    <form id="quick-expense-form">
+                        <div class="form-group">
+                            <label for="quick-expense-name">Expense Name</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-tag"></i>
+                                <input type="text" id="quick-expense-name" placeholder="Dinner, Movie" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="quick-expense-amount">Amount</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-pound-sign"></i>
+                                <input type="number" id="quick-expense-amount" min="0" step="0.01" placeholder="0.00" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="quick-paid-by">Paid By</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-user"></i>
+                                <select id="quick-paid-by" required>
+                                    <option value="">Select person</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Split Between</label>
+                            <button id="select-all" class="btn btn-secondary btn-small">
+                                <i class="fas fa-users"></i> Select All
+                            </button>
+                            <div id="default-group" class="checkbox-group">
+                                <!-- Checkboxes will be added dynamically -->
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Expense
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- QR Code Section -->
+                <div class="qr-code-section card">
+                    <h2><i class="fas fa-qrcode"></i> Group QR Code</h2>
+                    <div class="qr-code-container">
+                        <div id="qrcode"></div>
+                        <p class="qr-code-hint">Scan to join the group</p>
                     </div>
                 </div>
-                <button id="save-default-group" class="btn">Save Default Group</button>
             </div>
 
-            <div class="quick-expense-section">
-                <h2>Add Expense</h2>
-                <form id="quick-expense-form">
-                    <div class="form-group">
-                        <label for="quick-expense-name">Expense Name</label>
-                        <input type="text" id="quick-expense-name" required>
+            <!-- Right Column -->
+            <div class="right-column">
+                <div class="expense-summary card">
+                    <h2><i class="fas fa-chart-bar"></i>Expense Summary</h2>
+                    <div id="total-expenses" class="total-expenses">
+                        <span>Total Expenses:</span>
+                        <span class="amount">£0.00</span>
                     </div>
-                    <div class="form-group">
-                        <label for="quick-expense-amount">Amount</label>
-                        <input type="number" id="quick-expense-amount" min="0" step="0.01" required>
+                    <div id="average-per-person" class="average-per-person">
+                        <span>Average per Person:</span>
+                        <span class="amount">£0.00</span>
                     </div>
-                    <div class="form-group">
-                        <label for="quick-paid-by">Paid By</label>
-                        <select id="quick-paid-by" required>
-                            <option value="">Select Person</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn">Add Expense</button>
-                </form>
-            </div>
-
-            <div class="expense-summary">
-                <h2>Expense Summary</h2>
-                <div class="summary-content">
-                    <div class="summary-item">
-                        <span class="summary-label">Total Expenses:</span>
-                        <span id="total-expenses" class="summary-value">£0.00</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="summary-label">Average per Person:</span>
-                        <span id="average-per-person" class="summary-value">£0.00</span>
+                    <div id="individual-expenses" class="individual-expenses">
+                        <div class="individual-expenses-title">
+                            <i class="fas fa-user-circle"></i> Individual Expenses
+                        </div>
+                        <!-- Individual expenses will be added here -->
                     </div>
                 </div>
-            </div>
 
-            <div class="expense-history">
-                <h2>Expense History</h2>
-                <button id="export-expenses" class="btn btn-export">
-                </button>
-                <div id="expense-list">
-                    <!-- Expense items will be added here -->
+                <div class="settlements card">
+                    <div id="settlement-list">
+                        <!-- Settlement details will be added here -->
+                    </div>
                 </div>
-            </div>
 
-            <div class="settlements">
-                <h2>Settlements</h2>
-                <div id="settlement-list">
-                    <!-- Settlement details will be added here -->
+                <div class="card">
+                    <div id="expense-list"></div>
                 </div>
+
+                
             </div>
         </div>
     </div>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful');
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
-            });
-        }
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script type="module" src="script.js"></script>
 </body>
-</html> 
+</html>

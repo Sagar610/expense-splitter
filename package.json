@@ -4,11 +4,8 @@
   "description": "A simple web application to split expenses among friends and groups. Built with HTML, CSS, and JavaScript, using Firebase for real-time data storage.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Sagar610/expense-splitter.git"
+    "start": "firebase serve",
+    "deploy": "firebase deploy"
   },
   "keywords": [],
   "author": "",
@@ -18,9 +15,9 @@
   },
   "homepage": "https://github.com/Sagar610/expense-splitter#readme",
   "dependencies": {
-    "@capacitor/android": "^7.2.0",
-    "@capacitor/cli": "^7.2.0",
-    "@capacitor/core": "^7.2.0",
-    "@capacitor/http": "^0.0.2"
+    "firebase": "^10.8.0"
+  },
+  "devDependencies": {
+    "firebase-tools": "^12.4.0"
   }
 }

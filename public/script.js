@@ -584,3 +584,195 @@ function generateQRCode() {
         correctLevel: QRCode.CorrectLevel.H
     });
 }
+
+// Function to export expenses to Excel
+function exportToExcel() {
+    const groupName = document.getElementById('group-name-display').textContent;
+    
+    // Get data from Firebase
+    getDatabaseValue(groupRef).then((snapshot) => {
+        const groupData = snapshot.val();
+        if (!groupData) return;
+
+        const expenses = groupData.expenses || [];
+        const people = groupData.people || [];
+        
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+        
+        // Calculate total expenses and individual balances
+        const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+        const averagePerPerson = people.length ? totalExpenses / people.length : 0;
+        
+        const individualTotals = {};
+        people.forEach(person => {
+            individualTotals[person] = {
+                paid: 0,
+                owes: 0
+            };
+        });
+
+        expenses.forEach(expense => {
+            const paidBy = expense.paidBy;
+            const amount = expense.amount;
+            const splitBetween = expense.splitBetween;
+            const splitAmount = amount / splitBetween.length;
+
+            individualTotals[paidBy].paid += amount;
+            splitBetween.forEach(person => {
+                individualTotals[person].owes += splitAmount;
+            });
+        });
+
+        // Prepare data for Excel
+        const data = [
+            // Header
+            ['Expense Report', '', '', '', '', ''],
+            ['Group Name:', groupName, '', '', '', ''],
+            ['Generated Date:', new Date().toLocaleDateString(), '', '', '', ''],
+            ['', '', '', '', '', ''],
+            
+            // Summary Section
+            ['Summary', '', '', '', '', ''],
+            ['Total Expenses:', `£${totalExpenses.toFixed(2)}`, '', '', '', ''],
+            ['Average per Person:', `£${averagePerPerson.toFixed(2)}`, '', '', '', ''],
+            ['Number of People:', people.length, '', '', '', ''],
+            ['Number of Expenses:', expenses.length, '', '', '', ''],
+            ['', '', '', '', '', ''],
+            
+            // Individual Balances
+            ['Individual Balances', '', '', '', '', ''],
+            ['Name', 'Paid', 'Owes', 'Balance', '', ''],
+            ...Object.entries(individualTotals).map(([person, amounts]) => [
+                person,
+                `£${amounts.paid.toFixed(2)}`,
+                `£${amounts.owes.toFixed(2)}`,
+                `£${(amounts.paid - amounts.owes).toFixed(2)}`,
+                '',
+                ''
+            ]),
+            ['', '', '', '', '', ''],
+            
+            // Expenses Section
+            ['Expense History', '', '', '', '', ''],
+            ['Date', 'Expense Name', 'Amount', 'Paid By', 'Split Between', 'Per Person Share'],
+            ...expenses.map(expense => [
+                new Date(expense.date).toLocaleDateString(),
+                expense.name,
+                `£${expense.amount.toFixed(2)}`,
+                expense.paidBy,
+                expense.splitBetween.join(', '),
+                `£${(expense.amount / expense.splitBetween.length).toFixed(2)}`
+            ]),
+            ['', '', '', '', '', ''],
+            
+            // Settlements Section
+            ['Settlements Required', '', '', '', '', ''],
+            ['From', 'To', 'Amount', '', '', ''],
+            ...calculateSettlements(expenses).map(settlement => [
+                settlement.from,
+                settlement.to,
+                `£${settlement.amount.toFixed(2)}`,
+                '',
+                '',
+                ''
+            ])
+        ];
+
+        // Create worksheet
+        const ws = XLSX.utils.aoa_to_sheet(data);
+
+        // Set column widths
+        const colWidths = [
+            { wch: 15 }, // Date
+            { wch: 25 }, // Expense Name
+            { wch: 12 }, // Amount
+            { wch: 15 }, // Paid By
+            { wch: 30 }, // Split Between
+            { wch: 15 }  // Per Person Share
+        ];
+        ws['!cols'] = colWidths;
+
+        // Add styles to cells
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        
+        // Define styles
+        const styles = {
+            header: {
+                font: { sz: 14, bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "764BA2" } },
+                alignment: { horizontal: "center", vertical: "center" }
+            },
+            subheader: {
+                font: { sz: 12, bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "9B6B9E" } },
+                alignment: { horizontal: "center", vertical: "center" }
+            },
+            amount: {
+                font: { sz: 11 },
+                alignment: { horizontal: "right" }
+            },
+            negative: {
+                font: { sz: 11, color: { rgb: "FF0000" } },
+                alignment: { horizontal: "right" }
+            }
+        };
+
+        // Apply styles
+        for (let R = range.s.r; R <= range.e.r; R++) {
+            for (let C = range.s.c; C <= range.e.c; C++) {
+                const cell_address = { c: C, r: R };
+                const cell_ref = XLSX.utils.encode_cell(cell_address);
+                
+                if (!ws[cell_ref]) continue;
+
+                // Style section headers
+                if (ws[cell_ref].v === 'Expense Report' || 
+                    ws[cell_ref].v === 'Summary' || 
+                    ws[cell_ref].v === 'Individual Balances' || 
+                    ws[cell_ref].v === 'Expense History' || 
+                    ws[cell_ref].v === 'Settlements Required') {
+                    ws[cell_ref].s = styles.header;
+                }
+                
+                // Style column headers
+                else if (ws[cell_ref].v === 'Date' || 
+                         ws[cell_ref].v === 'Expense Name' || 
+                         ws[cell_ref].v === 'Amount' || 
+                         ws[cell_ref].v === 'Paid By' || 
+                         ws[cell_ref].v === 'Split Between' || 
+                         ws[cell_ref].v === 'Per Person Share' ||
+                         ws[cell_ref].v === 'Name' ||
+                         ws[cell_ref].v === 'Paid' ||
+                         ws[cell_ref].v === 'Owes' ||
+                         ws[cell_ref].v === 'Balance' ||
+                         ws[cell_ref].v === 'From' ||
+                         ws[cell_ref].v === 'To') {
+                    ws[cell_ref].s = styles.subheader;
+                }
+                
+                // Style amounts and balances
+                else if (typeof ws[cell_ref].v === 'string' && ws[cell_ref].v.startsWith('£')) {
+                    if (ws[cell_ref].v.startsWith('£-')) {
+                        ws[cell_ref].s = styles.negative;
+                    } else {
+                        ws[cell_ref].s = styles.amount;
+                    }
+                }
+            }
+        }
+
+        // Add the worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'Expense Report');
+
+        // Save the file
+        XLSX.writeFile(wb, `${groupName}_Expense_Report.xlsx`);
+    });
+}
+
+// Add event listener for export button
+document.getElementById('export-excel').addEventListener('click', exportToExcel);
+
+document.getElementById('new-group-btn').addEventListener('click', function() {
+    window.location.href = '/landing.html';
+});

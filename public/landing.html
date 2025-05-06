@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Bill Split</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="landing-container">
+        <div class="landing-card">
+            <div class="header-main">
+                <h1><i class="fas fa-receipt"></i> Bill Split</h1>
+                <span class="author-info">by <a href="https://github.com/Sagar610" target="_blank">Sagar</a></span>
+            </div>
+            <p class="tagline">Split bills easily with friends and family</p>
+            
+            <div class="action-buttons">
+                <form id="create-group-form" class="create-group-form">
+                    <input type="text" id="group-name" class="group-input" placeholder="Enter group name" required>
+                    <button type="submit" id="create-group" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Group
+                    </button>
+                </form>
+                <div class="or-divider">or</div>
+                <form id="join-group-form" class="join-group-form">
+                    <input type="text" id="group-id" class="group-input" placeholder="Enter group ID or paste group link" required>
+                    <button type="submit" id="join-group" class="btn btn-secondary">
+                        <i class="fas fa-sign-in-alt"></i> Join Group
+                    </button>
+                </form>
+            </div>
+
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-calculator"></i>
+                    <p>Split expenses fairly</p>
+                </div>
+                <div class="feature">
+                    <i onclick="shareOnWhatsApp()" class="fab fa-whatsapp"></i>
+                    <p>Share with friends</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-history"></i>
+                    <p>Track payment history</p>
+                </div>
+            </div>
+
+          
+        </div>
+    </div>
+
+    <script type="module" src="landing.js"></script>
+</body>
+</html> 

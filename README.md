@@ -56,3 +56,9 @@ Made with ❤️ by [Sagar Gondaliya](https://github.com/Sagar610)
 ## Support
 
 If you find this project helpful, please consider giving it a ⭐️ on GitHub! 
+
+
+firebase deploy --only hosting
+git commit -m "feat: show all transactions in WhatsApp share instead of last 5"
+git push origin main
+

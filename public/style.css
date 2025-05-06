@@ -1,0 +1,1380 @@
+:root {
+    --primary-color: #7c69ef;
+    --secondary-color: #9f92f3;
+    --success-color: #4caf50;
+    --background-color: #f8f9fe;
+    --text-color: #424242;
+    --border-color: #e6e8f0;
+    --card-shadow: 0 2px 4px rgba(124, 105, 239, 0.1);
+    --hover-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text-color);
+    background-color: var(--background-color);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 12px;
+}
+
+/* Header Styles */
+header {
+    text-align: center;
+    margin-bottom: 12px;
+    background: white;
+    padding: 8px 12px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+.header-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.header-main h1 {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+.header-main h1 i {
+    font-size: 1.4rem;
+}
+
+.author-info {
+    font-size: 0.75rem;
+    color: #666;
+    margin: 2px 0;
+}
+
+.author-info a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.group-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.group-name-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.group-name-container h4 {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    margin: 0;
+    white-space: nowrap;
+}
+
+#group-name-display {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    margin: 0;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+/* Remove custom styles for #copy-group-link to unify button appearance */
+#copy-group-link, #export-excel, #new-group-btn {
+    all: unset;
+}
+#copy-group-link.btn-cute, #export-excel.btn-cute, #new-group-btn.btn-cute {
+    all: unset;
+    padding: 4px 16px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    height: 32px;
+    min-width: 90px;
+    border-radius: 10px;
+    background: #764ba2;
+    color: #fff;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    box-shadow: 0 1px 4px rgba(118,75,162,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    vertical-align: middle;
+    line-height: 1.2;
+}
+#copy-group-link.btn-cute:hover, #export-excel.btn-cute:hover, #new-group-btn.btn-cute:hover,
+#copy-group-link.btn-cute:focus, #export-excel.btn-cute:focus, #new-group-btn.btn-cute:focus {
+    background: #9b6b9e;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(118,75,162,0.15);
+    text-decoration: none;
+}
+
+/* Main Content Layout */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 30px;
+    align-items: start;
+}
+
+/* Card Styles */
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    transition: box-shadow 0.3s ease;
+    margin-bottom: 25px;
+    height: auto;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.card:hover {
+    box-shadow: var(--hover-shadow);
+}
+
+/* Card Headers */
+.card h2 {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.card h2 i {
+    font-size: 0.85rem;
+    color: var(--primary-color);
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* Input with Icon Styles */
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.input-with-icon i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-size: 0.85rem;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Base input styles */
+.input-with-icon input[type="text"],
+.input-with-icon input[type="number"],
+.input-with-icon select {
+    display: block;
+    width: 100%;
+    height: 38px;
+    padding: 8px 12px 8px 35px;
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #333;
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+/* Placeholder styles */
+.input-with-icon input::placeholder {
+    color: #999;
+    font-size: 0.85rem;
+    opacity: 1;
+}
+
+/* Focus styles */
+.input-with-icon input:focus,
+.input-with-icon select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(124, 105, 239, 0.1);
+}
+
+/* Select specific styles */
+.input-with-icon select {
+    cursor: pointer;
+    padding-right: 30px;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 14px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Remove number input spinners */
+.input-with-icon input[type="number"]::-webkit-inner-spin-button,
+.input-with-icon input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input-with-icon input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Button Styles */
+.btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn i {
+    font-size: 0.9rem;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(124, 105, 239, 0.2);
+}
+
+.btn-secondary {
+    background-color: #7c69ef;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-small {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+/* Checkbox Group */
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px;
+    background: white;
+    border-radius: 8px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: var(--background-color);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.checkbox-item:hover {
+    background-color: #f0f0f0;
+}
+
+/* Expense Summary Styles */
+.expense-summary {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.total-expenses {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--background-color);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.total-expenses .amount {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.individual-expenses {
+    margin-top: 20px;
+    background: var(--background-color);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.individual-expenses-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.person-expense {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.person-amounts {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.person-amounts span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.9rem;
+}
+
+.person-amounts .paid {
+    color: var(--success-color);
+}
+
+.person-amounts .owes {
+    color: #f44336;
+}
+
+.person-amounts .balance {
+    font-weight: 600;
+}
+
+.person-amounts .balance.positive {
+    color: var(--success-color);
+}
+
+.person-amounts .balance.negative {
+    color: #f44336;
+}
+
+/* Expense History Styles */
+.expense-history {
+    position: relative;
+}
+
+.expense-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.expense-header h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.expense-filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.expense-total {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.badge {
+    background: var(--primary-color);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    min-width: 24px;
+    text-align: center;
+}
+
+.expense-list {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    position: relative;
+}
+
+.expense-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.expense-list-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.expense-list-title i {
+    font-size: 0.85rem;
+    color: var(--primary-color);
+}
+
+.expense-item {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+}
+
+.expense-item:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-1px);
+}
+
+.expense-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.expense-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.expense-name {
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
+.expense-amount {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.expense-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.expense-paid-by {
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.expense-splits {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.expense-date {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-delete {
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    color: #dc3545;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+}
+
+.btn-delete:hover {
+    opacity: 1;
+    background: rgba(220, 53, 69, 0.1);
+}
+
+.no-expenses {
+    text-align: center;
+    color: #666;
+    padding: 12px;
+    font-size: 0.9rem;
+}
+
+/* Receipt header */
+.receipt-header {
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed #ccc;
+}
+
+.receipt-header h2 {
+    font-size: 16px;
+    margin: 0;
+    font-weight: normal;
+}
+
+.receipt-header .date {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Receipt footer */
+.receipt-footer {
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 2px dashed #ccc;
+}
+
+.receipt-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-weight: bold;
+    border-top: 1px dashed #ccc;
+    margin-top: 10px;
+}
+
+/* Settlement Styles */
+.settlements-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settlement-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--background-color);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.settlement-item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--hover-shadow);
+}
+
+.settlement-details {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+}
+
+.settlement-from,
+.settlement-to {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.settlement-from i,
+.settlement-to i {
+    color: var(--primary-color);
+    font-size: 0.8rem;
+}
+
+.settlement-details .fa-arrow-right {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.settlement-amount {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.no-settlements {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+    font-size: 0.9rem;
+    background: var(--background-color);
+    border-radius: 8px;
+}
+
+@media (max-width: 480px) {
+    .settlement-item {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .settlement-amount {
+        align-self: flex-end;
+    }
+}
+
+/* Share Buttons */
+.share-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-copy {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-copy:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(124, 105, 239, 0.2);
+}
+
+.btn-copy i {
+    font-size: 0.9rem;
+}
+
+/* WhatsApp Button */
+.btn-whatsapp {
+    background-color: #25D366;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-whatsapp:hover {
+    background-color: #128C7E;
+    transform: translateY(-1px);
+}
+
+.btn-whatsapp i {
+    font-size: 0.9rem;
+}
+
+/* Scrollbar Styling */
+.card::-webkit-scrollbar {
+    width: 8px;
+}
+
+.card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.card::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.card::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .card {
+        max-height: 500px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header-main h1 {
+        font-size: 2rem;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .checkbox-group {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    
+    .expense-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .landing-container {
+        padding: 15px;
+    }
+
+    .landing-card {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .create-group-form,
+    .join-group-form {
+        padding: 15px;
+    }
+
+    .group-input, input.group-input {
+        height: 44px !important;
+        min-height: 44px !important;
+        max-height: 44px !important;
+        line-height: 1.2 !important;
+        box-sizing: border-box !important;
+        display: block !important;
+        resize: none !important;
+        padding: 12px 16px !important;
+        font-size: 1rem !important;
+        border-radius: 8px !important;
+        width: 100%;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .toast {
+        left: 20px;
+        right: 20px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-main {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .group-info {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .group-name-container {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    #group-name-display {
+        max-width: 150px;
+    }
+
+    .expense-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .btn-whatsapp {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .expense-main {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .expense-meta {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .group-actions {
+        flex-direction: row;
+        width: auto;
+        gap: 8px;
+    }
+    
+    .btn-new-group {
+        padding: 8px 10px;
+    }
+
+    .btn-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .btn-compact {
+        padding: 6px 10px;
+    }
+}
+
+/* Card Sections */
+.add-people-section,
+.quick-expense-section,
+.expense-summary,
+.settlements,
+.qr-code-section {
+    padding: 12px;
+}
+
+/* QR Code Styles */
+.qr-code-section {
+    margin-top: 20px;
+}
+
+.qr-code-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+}
+
+#qrcode {
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.qr-code-hint {
+    margin-top: 12px;
+    color: #666;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Make all section headers consistent */
+.expense-summary h2,
+.settlements h2,
+.add-people-section h2,
+.quick-expense-section h2,
+.qr-code-section h2 {
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 12px;
+}
+
+/* Landing Page Styles */
+.landing-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.landing-card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+}
+
+.landing-card .header-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.landing-card .header-main h1 {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+.landing-card .author-info {
+    font-size: 0.75rem;
+    color: #666;
+    margin: 0;
+}
+
+.landing-card .tagline {
+    color: #666;
+    font-size: 1rem;
+    margin: 8px 0 20px;
+}
+
+.landing-card h1 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+}
+
+.landing-card h1 i {
+    color: #764ba2;
+    margin-right: 10px;
+}
+
+.tagline {
+    color: #666;
+    font-size: 1.2em;
+    margin-bottom: 30px;
+}
+
+.action-buttons {
+    margin: 30px auto;
+    max-width: 300px;
+}
+
+.create-group-form,
+.join-group-form {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.group-input, input.group-input {
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    resize: none !important;
+    padding: 12px 16px !important;
+    font-size: 1rem !important;
+    border-radius: 8px !important;
+    width: 100%;
+}
+
+.landing-card .btn {
+    padding: 12px 24px;
+    height: auto;
+    min-width: auto;
+    font-size: 1rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    width: auto;
+}
+
+.or-divider {
+    margin: 16px 0;
+    color: #666;
+    position: relative;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.or-divider::before,
+.or-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 45%;
+    height: 1px;
+    background: #ddd;
+}
+
+.or-divider::before {
+    left: 0;
+}
+
+.or-divider::after {
+    right: 0;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #eee;
+}
+
+.feature {
+    text-align: center;
+}
+
+.feature i {
+    font-size: 24px;
+    color: #764ba2;
+    margin-bottom: 10px;
+}
+
+.feature p {
+    color: #666;
+    font-size: 0.9em;
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .landing-card {
+        padding: 20px;
+    }
+
+    .create-group-form,
+    .join-group-form {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    input.group-input {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        padding: 10px !important;
+        height: 44px !important;
+        min-height: 44px !important;
+        box-sizing: border-box !important;
+        font-size: 1rem !important;
+        border-radius: 8px !important;
+        resize: none !important;
+        line-height: 1.2 !important;
+    }
+    textarea.group-input {
+        height: auto;
+        min-height: 80px;
+        resize: vertical;
+    }
+
+    .person-amounts {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+    }
+
+    .expense-summary {
+        padding: 15px;
+    }
+
+    .total-expenses {
+        padding: 10px;
+    }
+
+    .individual-expenses {
+        padding: 12px;
+    }
+
+    .person-expense {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .person-amounts {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    background: white;
+    color: var(--text-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.toast-success {
+    border-left: 4px solid var(--success-color);
+}
+
+.toast.toast-error {
+    border-left: 4px solid #f44336;
+}
+
+/* Share Section */
+.share-section {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.btn-share {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-share:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(124, 105, 239, 0.2);
+}
+
+.btn-share i {
+    font-size: 1.1rem;
+}
+
+@media (max-width: 600px) {
+    .btn-share {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+.group-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 14px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.btn-new-group {
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.btn-new-group:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(124, 105, 239, 0.2);
+    background-color: var(--secondary-color);
+}
+
+.btn-new-group i {
+    font-size: 0.9rem;
+}
+
+.btn-icon {
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.btn-icon:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(124, 105, 239, 0.2);
+    background-color: var(--secondary-color);
+}
+
+.btn-compact {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    text-decoration: none;
+    min-width: 90px;
+}
+
+.btn-compact:hover {
+    text-decoration: none;
+}
+
+.btn-compact i {
+    font-size: 0.85rem;
+}
+
+/* Improved cute button style for Share, Export, and New Group */
+.btn-cute {
+    padding: 4px 16px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    height: 32px;
+    min-width: 90px;
+    border-radius: 10px;
+    background: #764ba2;
+    color: #fff;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    box-shadow: 0 1px 4px rgba(118,75,162,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    vertical-align: middle;
+    line-height: 1.2;
+}
+.btn-cute i {
+    font-size: 1em;
+    margin-right: 3px;
+    display: inline-block;
+    vertical-align: middle;
+}
+.btn-cute:hover, .btn-cute:focus {
+    background: #9b6b9e;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(118,75,162,0.15);
+    text-decoration: none;
+}
+
+@media (max-width: 480px) {
+    .btn-cute, #copy-group-link.btn-cute, #export-excel.btn-cute, #new-group-btn.btn-cute {
+        font-size: 0.78rem;
+        min-width: 60px;
+        padding: 2px 8px;
+        height: 26px;
+    }
+    .group-actions {
+        gap: 7px;
+    }
+} 
